@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">EDUTOPIK PLAYER</string>
+    <string name="host" translatable="false">player</string>
+    <string name="scheme" translatable="false">lecture</string>
+
+    <!--MainActivity-->
+
+    <string name="request_permission_title">PERMISSION REQUEST</string>
+    <string name="request_permission_message">Permission is required in order to retrieve device key. Device key is used to prevent duplicate users within a single account.</string>
+    <string name="request_permission_manually">You must allow permission manually to use the app</string>
+    <string name="confirm">confirm</string>
+    <string name="cancel">cancel</string>
+
+    <string name="allow">allow</string>
+    <string name="deny">deny(terminate)</string>
+</resources>
