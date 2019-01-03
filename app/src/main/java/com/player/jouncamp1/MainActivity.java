@@ -23,10 +23,21 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.Toast;
 
+import com.player.jouncamp1.Model.ModelsManager;
+
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -204,11 +215,12 @@ public class MainActivity extends AppCompatActivity {
     }
     }
 
-    class CheckDevice extends AsyncTask<Void, Void, Void> {
+    class CheckDevice extends AsyncTask<String, Void, String> {
+
+        URL url = null;
 
         public CheckDevice() {
             super();
-
         }
 
         @Override
@@ -216,10 +228,86 @@ public class MainActivity extends AppCompatActivity {
             super.onPreExecute();
         }
 
-
         @Override
-        protected Void doInBackground(Void... voids) {
-            return null;
+        protected String doInBackground(String... arg0) {
+
+            HttpURLConnection conn = null;
+            JSONObject postDataParams = null;
+
+            try {
+
+                url = new URL(M("authentication_url"));
+
+                postDataParams = new JSONObject(GlobalVariables.getParam("json_data"));
+                Log.d("data", postDataParams.toString());
+
+                conn = (HttpURLConnection) url.openConnection();
+
+                conn.setReadTimeout(READ_TIMEOUT /* milliseconds */);
+                conn.setConnectTimeout(CONNECT_TIMEOUT /* milliseconds */);
+                conn.setRequestMethod("POST");
+                //conn.setRequestProperty("Cookie",cookie);
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            if (conn == null) return null;
+
+            OutputStream os;
+            BufferedWriter writer;
+            try {
+                os = conn.getOutputStream();
+                writer = new BufferedWriter(
+                        new OutputStreamWriter(os, "UTF-8"));
+                writer.write(getPostDataString(postDataParams));
+                Log.d("***data***", getPostDataString(postDataParams).toString());
+                writer.flush();
+                writer.close();
+                os.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            StringBuffer sb = null;
+            try {
+                int responseCode = conn.getResponseCode();
+
+                if (responseCode == HttpsURLConnection.HTTP_OK) {
+
+                    BufferedReader in = new BufferedReader(
+                            new InputStreamReader(
+                                    conn.getInputStream()));
+                    sb = new StringBuffer("");
+                    String line;
+                    Log.i("#####", "" + responseCode);
+                    while ((line = in.readLine()) != null) {
+                        sb.append(line);
+                    }
+                    //Log.i("####*********####",sb.toString());
+                    in.close();
+                } else {
+                    Log.i("response", "" + responseCode);
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getApplicationContext());
+
+                    alertDialogBuilder.setTitle(getString(R.string.unauthenticated_uses));
+                    alertDialogBuilder.setMessage(getString(R.string.request_the_developer)).setCancelable(false);
+                    alertDialogBuilder.setPositiveButton(getString(R.string.confirm), new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+
+                            finish();
+                        }
+                    });
+                    alertDialogBuilder.show();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (sb == null) {
+                return null;
+            }
+            //Log.d("@@@@@@@@", sb.toString());
+            return sb.toString();
         }
 
 
