@@ -7,6 +7,6 @@ public class Lecture {
     int currentPlayTime;
     char continuousPlayDecision;
     String videoUrl;
-
-
 }
+
+
